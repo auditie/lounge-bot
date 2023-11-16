@@ -13,12 +13,14 @@ client.on('voiceStateUpdate', async (oldState, newState) => {
         const newVC = await guild.channels.create(`${user.username}'s VC`, {
             type: 'GUILD_VOICE', // Set channel type to GUILD_VOICE
             parent: '1174587455203188778', // Set the parent category ID for the channels 1174587455203188778 is personal test
+            permissionOverwrites: originalChannel.permissionOverwrites, // Inherit permissions from the original channel
         });
 
         // Create a new text channel with the user's name
         const newTextChat = await guild.channels.create(`${user.username}'s Chat`, {
             type: 'GUILD_TEXT', // Set channel type to GUILD_TEXT
             parent: '1174587455203188778', // Set the parent category ID for the channels 1174587455203188778 is personal test
+            permissionOverwrites: originalChannel.permissionOverwrites, // Inherit permissions from the original channel
         });
 
         // Send a welcome message with setup instructions to the text channel
