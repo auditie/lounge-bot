@@ -1,7 +1,8 @@
-require('dotenv').config(); //requires env to get token.
-const {Client, IntentsBitField} = require('discord.js');
+require('dotenv').config(); //requires .env to get token.
+const {Client, IntentsBitField} = require('discord.js'); //pulls in Client and IntentsBitField from discord.js and requires discord.js
 
 const client = new Client({
+    //Specific intents we want to be avail
     intents: [
         IntentsBitField.Flags.Guilds,
         IntentsBitField.Flags.GuildMembers,
@@ -9,7 +10,7 @@ const client = new Client({
         IntentsBitField.Flags.MessageContent,
     ]
 })
-
+//When bot is on, console log bot name is online
 client.on('ready', (c) => {
     console.log(`${c.user.tag} is online`);
 });
@@ -27,4 +28,5 @@ client.on('messageCreate', (message) => {
     }
 })
 
+//login using .env.TOKEN
 client.login(process.env.TOKEN);
