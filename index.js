@@ -1,6 +1,8 @@
-require('dotenv').config(); //requires .env to get token.
-const {Client, IntentsBitField} = require('discord.js'); //pulls in Client and IntentsBitField from discord.js and requires discord.js
+// Load the required dependencies
+require('dotenv').config(); // Loads environment variables from a .env file
+const { Client, IntentsBitField } = require('discord.js'); // Imports necessary Discord.js modules
 
+// Create a new Discord client instance
 const client = new Client({
     //Specific intents we want to be avail
     intents: [
@@ -10,23 +12,32 @@ const client = new Client({
         IntentsBitField.Flags.MessageContent,
     ]
 })
-//When bot is on, console log bot name is online
+
+// Set desired prefix here
+const prefix = '!'; 
+
+// Event listener for when the bot is ready
 client.on('ready', (c) => {
-    console.log(`${c.user.tag} is online`);
+    console.log(`${c.user.tag} is online`); // Logs the bot's username with a message when it's online
 });
 
-//ping response to make sure bot is online
+// Event listener for incoming messages(ping response)
 client.on('messageCreate', (message) => {
-    console.log(message.content);
-    //Prevents the bot from reading messages from bots
-    if(message.author.bot) {
-        return;
+    // Check if the author of the message is a bot or if the message doesn't start with the defined prefix
+    if (message.author.bot || !message.content.toLowerCase().startsWith(prefix)) {
+        return; // If true, exit early and ignore the message
     }
-    //if it reads the content it replys.
-    if (message.content === 'ping') {
-        message.reply('I hear you, PONG')
-    }
-})
 
-//login using .env.TOKEN
+    // Extract arguments and command from the message content
+    const args = message.content.slice(prefix.length).trim().split(/ +/);
+    const command = args.shift().toLowerCase();
+
+    // Check if the command matches 'ping' (case-insensitive)
+    if (command === 'ping') {
+        // If the command is 'ping', reply with 'I hear you, PONG!'
+        message.reply('I hear you, PONG!');
+    }
+});
+
+// Log in to Discord using the bot token from the environment variables
 client.login(process.env.TOKEN);
