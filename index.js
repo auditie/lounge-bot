@@ -1,43 +1,34 @@
-// Load the required dependencies
-require('dotenv').config(); // Loads environment variables from a .env file
-const { Client, IntentsBitField } = require('discord.js'); // Imports necessary Discord.js modules
+const { Client, Collection, GatewayIntentBits, Events } = require('discord.js');
+const fs = require('fs');
+require('dotenv').config();
 
-// Create a new Discord client instance
-const client = new Client({
-    //Specific intents we want to be avail
-    intents: [
-        IntentsBitField.Flags.Guilds,
-        IntentsBitField.Flags.GuildMembers,
-        IntentsBitField.Flags.GuildMessages,
-        IntentsBitField.Flags.MessageContent,
-    ]
-})
+const client = new Client({ intents: [GatewayIntentBits.Guilds] });
 
-// Set desired prefix here
-const prefix = '!'; 
+client.commands = new Collection();
 
-// Event listener for when the bot is ready
-client.on('ready', (c) => {
-    console.log(`${c.user.tag} is online`); // Logs the bot's username with a message when it's online
+// Load slash commands
+const slashCommandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'));
+for (const file of slashCommandFiles) {
+    const command = require(`./commands/${file}`);
+    client.commands.set(command.data.name, command);
+}
+
+client.once('ready', () => {
+    console.log(`Logged in as ${client.user.tag}!`);
 });
 
-// Event listener for incoming messages(ping response)
-client.on('messageCreate', (message) => {
-    // Check if the author of the message is a bot or if the message doesn't start with the defined prefix
-    if (message.author.bot || !message.content.toLowerCase().startsWith(prefix)) {
-        return; // If true, exit early and ignore the message
-    }
+client.on('interactionCreate', async (interaction) => {
+    if (!interaction.isCommand()) return;
 
-    // Extract arguments and command from the message content
-    const args = message.content.slice(prefix.length).trim().split(/ +/);
-    const command = args.shift().toLowerCase();
+    const command = client.commands.get(interaction.commandName);
+    if (!command) return;
 
-    // Check if the command matches 'ping' (case-insensitive)
-    if (command === 'ping') {
-        // If the command is 'ping', reply with 'I hear you, PONG!'
-        message.reply('I hear you, PONG!');
+    try {
+        await command.execute(interaction);
+    } catch (error) {
+        console.error(error);
+        await interaction.reply({ content: 'An error occurred while executing the command.', ephemeral: true });
     }
 });
 
-// Log in to Discord using the bot token from the environment variables
 client.login(process.env.TOKEN);
